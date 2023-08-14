@@ -1,4 +1,5 @@
 import { peoples } from "../constant/peoples.js";
+import Joi from 'joi'
 
 const tickets = [];
 let ticketIdCounter = 0;
@@ -6,7 +7,13 @@ let lastAssignedPersonIndex = -1;
 
 function createTicket(req, res) {
     try {
-        const { issue_description, raised_by } = req.body;
+        const schema = Joi.object({
+            issue_description: Joi.string().required(),
+            raised_by: Joi.number().required()
+          });
+        const { error, value } = schema.validate(req.body);
+        if(error) return res.status(400).json({message:error.details[0].message});
+        const { issue_description, raised_by } = value;
         lastAssignedPersonIndex = (lastAssignedPersonIndex + 1) % (peoples.length);
         let assigned_to = peoples[lastAssignedPersonIndex].id;
         ticketIdCounter++;
